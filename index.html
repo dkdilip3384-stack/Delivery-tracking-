@@ -2,96 +2,74 @@
 <html lang="ta">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Savvy Pro - Dilip Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fuel Savvy Pro - Dilip Pro Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        #map { height: 300px; width: 100%; border-radius: 15px; margin-bottom: 15px; }
-        .stat-card { background: #1e293b; padding: 15px; border-radius: 20px; border: 1px solid #334155; }
+        #map { height: 400px; width: 100%; border-radius: 24px; transition: all 0.4s ease; z-index: 1; }
+        .full-screen-map { position: fixed; top: 0; left: 0; height: 100vh !important; width: 100vw !important; z-index: 9999; border-radius: 0 !important; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .gradient-btn { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); transition: all 0.3s ease; }
+        .tab-active { border-bottom: 3px solid #22c55e; color: #22c55e; }
     </style>
 </head>
-<body class="bg-slate-900 text-white p-4">
-    <h1 class="text-xl font-bold text-green-400 mb-4 text-center">Fuel Savvy Pro</h1>
+<body class="bg-[#0f172a] text-slate-100 font-sans selection:bg-green-500/30">
 
-    <div id="map"></div>
+    <div class="max-w-md mx-auto p-4 pb-28">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-black text-white tracking-tight">Fuel Savvy <span class="text-green-500">Pro</span></h1>
+                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-widest">Delivery Intelligence System</p>
+            </div>
+            <button onclick="toggleSettings()" class="p-2 bg-slate-800 rounded-full border border-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </button>
+        </header>
 
-    <div class="grid grid-cols-2 gap-3 mb-4">
-        <div class="stat-card">
-            <p class="text-[10px] text-slate-400">டிஸ்டன்ஸ்</p>
-            <p id="distDisplay" class="text-lg font-bold">0.00 km</p>
+        <div class="relative mb-6 group">
+            <div id="map" class="shadow-2xl border-2 border-slate-800/50"></div>
+            <button onclick="toggleMapFull()" class="absolute top-4 right-4 z-[1000] bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-xl hover:bg-white/20 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+            </button>
         </div>
-        <div class="stat-card">
-            <p class="text-[10px] text-slate-400">லாபம்</p>
-            <p id="profitDisplay" class="text-lg font-bold text-green-400">₹0.00</p>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="glass-card p-5 rounded-[2rem] shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full -mr-12 -mt-12"></div>
+                <p class="text-[10px] font-bold text-slate-400 mb-1 tracking-wider uppercase">Earnings</p>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-3xl font-black text-white">₹</span>
+                    <span id="profitDisp" class="text-3xl font-black text-white">0.00</span>
+                </div>
+            </div>
+            <div class="glass-card p-5 rounded-[2rem] shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -mr-12 -mt-12"></div>
+                <p class="text-[10px] font-bold text-slate-400 mb-1 tracking-wider uppercase">Distance</p>
+                <div class="flex items-baseline gap-1">
+                    <span id="distDisp" class="text-3xl font-black text-white">0.0</span>
+                    <span class="text-xs font-bold text-slate-500 uppercase">km</span>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="bg-slate-800 p-4 rounded-2xl mb-4">
-        <div class="flex gap-2 mb-2">
-            <input type="number" id="petrolAmt" placeholder="பெட்ரோல் ₹" class="flex-1 bg-slate-700 p-2 rounded-lg outline-none text-sm">
-            <button onclick="savePetrol()" class="bg-blue-600 px-4 py-2 rounded-lg font-bold text-xs">ADD</button>
-        </div>
-        <p id="historyText" class="text-[10px] text-slate-400 italic">History: இன்னும் சேமிக்கப்படவில்லை</p>
-    </div>
-
-    <button id="mainBtn" onclick="toggleTrip()" class="w-full bg-green-500 text-slate-900 font-bold py-4 rounded-2xl text-xl shadow-lg">START TRIP</button>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        let isTripActive = false;
-        let startPoint = null;
-        let maxDist = 0;
-        
-        // மேப் செட்டப்
-        const map = L.map('map').setView([12.8465, 80.2263], 15);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-        let marker = L.marker([12.8465, 80.2263]).addTo(map);
-
-        function toggleTrip() {
-            isTripActive = !isTripActive;
-            const btn = document.getElementById('mainBtn');
-            if(isTripActive) {
-                btn.innerText = "FINISH TRIP";
-                btn.style.backgroundColor = "#ef4444";
-                maxDist = 0;
-            } else {
-                btn.innerText = "START TRIP";
-                btn.style.backgroundColor = "#22c55e";
-                alert("பயணம் முடிந்தது!");
-            }
-        }
-
-        navigator.geolocation.watchPosition(p => {
-            const pos = [p.coords.latitude, p.coords.longitude];
-            marker.setLatLng(pos);
-            map.setView(pos);
-            
-            if(!startPoint) startPoint = pos;
-            if(!isTripActive) return;
-
-            let distMeters = map.distance(pos, startPoint);
-            let distKm = distMeters / 1000;
-            
-            // ரிட்டன் லாஜிக்: தூரம் குறைய ஆரம்பித்தால் ₹5 கணக்கு
-            let currentProfit = 0;
-            if (distMeters > maxDist) {
-                maxDist = distMeters;
-                currentProfit = distKm * 10; // போகும்போது ₹10
-            } else {
-                currentProfit = distKm * 5; // வரும்போது ₹5
-            }
-
-            document.getElementById('distDisplay').innerText = distKm.toFixed(2) + " km";
-            document.getElementById('profitDisplay').innerText = "₹" + currentProfit.toFixed(2);
-        }, null, {enableHighAccuracy: true});
-
-        function savePetrol() {
-            let amt = document.getElementById('petrolAmt').value;
-            if(!amt) return;
-            document.getElementById('historyText').innerText = "கடைசியாக சேர்த்தது: ₹" + amt;
-            alert("சேமிக்கப்பட்டது!");
-        }
-    </script>
-</body>
-</html>
+        <div id="settingsPanel" class="hidden space-y-4 mb-6">
+            <div class="bg-slate-800/80 p-6 rounded-[2rem] border border-slate-700 shadow-2xl">
+                <h3 class="text-blue-400 font-bold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Fuel & Rates
+                </h3>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <input type="number" id="mileage" value="40" placeholder="Mileage" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                    <input type="number" id="fuelPrice" value="103" placeholder="Fuel Price" class="bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                </div>
+                <div class="flex gap-2">
+                    <input type="number" id="petAmt" placeholder="Add Petrol Amount ₹" class="flex-1 bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm outline-none">
+                    <button onclick="savePetrol()" class="bg-blue-600 px-5 rounded
