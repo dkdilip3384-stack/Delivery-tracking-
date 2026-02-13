@@ -1,61 +1,73 @@
-name: Build Full APK
+name: Build Debug APK
 
-on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
+push:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v3
+branches: [ main, master ] workflow dispatch:
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+jobs: build: runs-on: ubuntu-latest
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+steps:
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+- name: Checkout Source uses: actions/checkout@v3
 
-      - name: Install Cordova
-        run: npm install -g cordova
+Setup Node.js
 
-      - name: Create App SStructuretructure
-        run: |
-          # Create a fresh Cordova project with your package name
-          cordova create myapp com.fuelsavvy.pro "Fuel Savvy Pro"
-          cd myapp
-          
-          # Add Android Platform
-          cordova platform add android
-          
-          # Remove default cordova app content
-          rm -rf www/*
-          
-          # Copy your index.html to the app folder
-          cp ../index.html www/index.html
-          
-          # (Optional) Install plugins if needed for location/maps
-          cordova plugin add cordova-plugin-geolocation
+uses: actions/setup-node@v3
 
-      - name: Build APK
-        run: |
-          cd myapp
-          # Build the APK
-          cordova build android --release -- --packageType=apk
+with:
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: FuelSavvyPro-APK
-          path: myapp/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+node-version:
+
+'18'
+
+name: Setup Java
+
+uses: actions/setup-java@v3
+
+with:
+
+distribution: 'temurir
+
+java-version: '17'
+
+name: Setup Android SDK
+
+uses: android-actions/setup-android@v3
+
+name: Install Cordova
+
+run: npm install -g cordova
+
+name: Create App Structure
+
+run: |
+
+# Create a fresh Cordova project cordova create myapp com. fuelsavvy.pro "Fuel Savvy Pro" cd myapp
+
+# Add Android Platform
+
+cordova platform add android
+
+# Remove default content rm -rf www/*
+
+Copy your index.html to the app folder cp../index.html www/index.html
+
+# Install Location Plugin (Required for GPS) cordova plugin add cordova-plugin-geolocation
+
+name: Build Debug APK
+
+run:
+
+cd myapp
+
+# Build a DEBUG APK (This is auto-signed and installs without error) cordova build android --debug
+
+name: Upload APK
+
+uses: actions/upload-artifact@v4
+
+with:
+
+name: FuelSavvyPro-Debug-APK
+
+path: myapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
