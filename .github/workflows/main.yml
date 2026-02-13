@@ -1,4 +1,4 @@
-name: Build FuelSavvy Pro (Modern 12.0)
+name: Build FuelSavvy Pro (Compatibility Mode)
 
 on:
   push:
@@ -7,23 +7,24 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # STRATEGY: Use older stable Ubuntu 22.04 to avoid bleeding-edge tool conflicts
+    runs-on: ubuntu-22.04
     
     steps:
       - name: Checkout Source
         uses: actions/checkout@v3
 
-      # Java 17 is REQUIRED for Cordova Android 12+
-      - name: Setup Java 17
+      # Java 11 is the perfect match for Cordova Android 11
+      - name: Setup Java 11
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '16'
 
       - name: Install Cordova
         run: npm install -g cordova
@@ -34,9 +35,8 @@ jobs:
           cordova create fuelapp com.fuelsavvy.pro "Fuel Savvy Pro"
           cd fuelapp
           
-          # 2. Add Android Platform 12.0.0 (Modern & Stable)
-          # This version natively supports newer Gradle, fixing the XmlParser error.
-          cordova platform add android@12.0.0
+          # 2. Add Android Platform 11.0.0 (The most stable legacy version)
+          cordova platform add android@11.0.0
           
           # 3. Copy Files
           rm -rf www/*
@@ -50,10 +50,14 @@ jobs:
         run: |
           cd fuelapp
           
+          # CRITICAL FIX: Force Gradle 7.6
+          # Newer Gradle versions cause 'XmlParser' errors on Android 11
+          export CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL="https://services.gradle.org/distributions/gradle-7.6-all.zip"
+          
           # Memory Optimization
           export GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
           
-          # Build using Cordova 12 standard
+          # Build
           cordova build android --debug
 
       - name: Upload APK
