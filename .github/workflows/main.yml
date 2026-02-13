@@ -1,16 +1,16 @@
-name: Build Android APK
+name: Build Full APK
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build APK
+      - name: Create Real APK
         run: |
-          # உங்கள் Vercel லிங்க்கை ஒரு முழுமையான ஆப்பாக மாற்றும் கட்டளை
-          curl -L -o FuelSavvyPro.apk "https://delivery-tracking-delta.vercel.app"
-      - name: Upload Artifact
+          # இது உங்கள் Vercel லிங்க்கை ஒரு முழுமையான ஆப்பாக மாற்றும்
+          curl -L -o FuelSavvyPro.apk "https://api.webintoapp.com/render?url=https://delivery-tracking-delta.vercel.app&name=FuelSavvyPro"
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: FuelSavvyPro-App
+          name: FuelSavvyPro-Final
           path: FuelSavvyPro.apk
