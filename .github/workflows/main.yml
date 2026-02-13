@@ -5,12 +5,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build APK
+      - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build with WebIntoApp
         run: |
-          # இது உங்கள் Vercel லிங்க்கை ஆப்பாக மாற்றும்
-          curl -o FuelSavvyPro.apk https://delivery-tracking-delta.vercel.app/index.html
-      - name: Upload
+          curl -L -o FuelSavvyPro.apk "https://api.webintoapp.com/render?url=https://delivery-tracking-delta.vercel.app&name=FuelSavvyPro"
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: FuelSavvyPro-App
+          name: Real-APK-File
           path: FuelSavvyPro.apk
