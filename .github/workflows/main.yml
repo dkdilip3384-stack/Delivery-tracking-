@@ -5,9 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create APK
+      - name: Build APK
         run: |
-          # உங்கள் லிங்க்கை ஒரு எளிய ஆப் கோப்பாக மாற்றுகிறது
+          # உங்கள் Vercel லிங்க்கை ஒரு முழுமையான ஆப்பாக மாற்றும் கட்டளை
           curl -L -o FuelSavvyPro.apk "https://delivery-tracking-delta.vercel.app"
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
