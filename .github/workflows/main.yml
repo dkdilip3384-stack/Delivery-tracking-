@@ -1,4 +1,4 @@
-name: Build FuelSavvy Pro (Final Fix)
+name: Build FuelSavvy Pro (Absolute Final)
 
 on:
   push:
@@ -13,62 +13,61 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v3
 
-      # Use Java 11 (Best for Cordova 11)
-      - name: Setup Java 11
+      # Java 17 is REQUIRED for Android 12+
+      - name: Setup Java 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-
-      # Fix "Exit Code 1" - Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 8512546
+          node-version: '18'
 
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create Project & Build
+      - name: Create Project & Configure
         run: |
           # 1. Create Project
           cordova create fuelapp com.fuelsavvy.pro "Fuel Savvy Pro"
           cd fuelapp
           
-          # 2. Add Android Platform (11.0.0 is stable)
-          cordova platform add android@11.0.0
+          # 2. Add Android Platform 12.0.0 (Modern Standard)
+          cordova platform add android@12.0.0
           
-          # 3. CRITICAL FIX: FORCE GRADLE 7.6
-          # The system default is Gradle 9.x which breaks Cordova 11 (XmlParser Error)
-          export CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL="https://services.gradle.org/distributions/gradle-7.6-all.zip"
+          # 3. CRITICAL FIX: MANUALLY REWRITE GRADLE VERSION
+          # GitHub Actions defaults to Gradle 9.x which crashes Cordova.
+          # We use 'sed' to force it to use Gradle 8.1.1 inside the wrapper properties.
+          cd platforms/android/gradle/wrapper
+          sed -i 's/gradle-.*-all.zip/gradle-8.1.1-all.zip/g' gradle-wrapper.properties
+          
+          # Verify the change (printed to logs)
+          cat gradle-wrapper.properties
+          
+          cd ../../../..
           
           # 4. Copy Files
-          rm -rf www/*
-          cp ../index.html www/index.html
-          cp ../AndroidManifest.xml platforms/android/app/src/main/AndroidManifest.xml
+          rm -rf fuelapp/www/*
+          cp index.html fuelapp/www/index.html
+          cp AndroidManifest.xml fuelapp/platforms/android/app/src/main/AndroidManifest.xml
           
           # 5. Add Plugins
+          cd fuelapp
           cordova plugin add cordova-plugin-geolocation
 
       - name: Build Debug APK
         run: |
           cd fuelapp
-          
-          # Force Gradle 7.6 again to be safe
-          export CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL="https://services.gradle.org/distributions/gradle-7.6-all.zip"
-          
-          # Memory limits
+          # Optimize Memory
           export GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
           
+          # Build
           cordova build android --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: FuelSavvy-Working-App
+          name: FuelSavvy-Pro-App
           path: fuelapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
