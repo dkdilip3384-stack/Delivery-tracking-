@@ -1,16 +1,61 @@
 name: Build Full APK
-on: [push]
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - name: Create Real APK
+      - name: Checkout Source
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Create App SStructuretructure
         run: |
-          # இது உங்கள் Vercel லிங்க்கை ஒரு முழுமையான ஆப்பாக மாற்றும்
-          curl -L -o FuelSavvyPro.apk "https://api.webintoapp.com/render?url=https://delivery-tracking-delta.vercel.app&name=FuelSavvyPro"
+          # Create a fresh Cordova project with your package name
+          cordova create myapp com.fuelsavvy.pro "Fuel Savvy Pro"
+          cd myapp
+          
+          # Add Android Platform
+          cordova platform add android
+          
+          # Remove default cordova app content
+          rm -rf www/*
+          
+          # Copy your index.html to the app folder
+          cp ../index.html www/index.html
+          
+          # (Optional) Install plugins if needed for location/maps
+          cordova plugin add cordova-plugin-geolocation
+
+      - name: Build APK
+        run: |
+          cd myapp
+          # Build the APK
+          cordova build android --release -- --packageType=apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: FuelSavvyPro-Final
-          path: FuelSavvyPro.apk
+          name: FuelSavvyPro-APK
+          path: myapp/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
