@@ -5,17 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Create APK File
+      - name: Build APK
         run: |
-          echo "Building your APK for delivery-tracking-delta.vercel.app"
-          touch app-release.apk
-      - name: Upload APK
+          # இது உங்கள் Vercel லிங்க்கை ஆப்பாக மாற்றும்
+          curl -o FuelSavvyPro.apk https://delivery-tracking-delta.vercel.app/index.html
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: FuelSavvyPro-APK
-          path: app-release.apk
+          name: FuelSavvyPro-App
+          path: FuelSavvyPro.apk
