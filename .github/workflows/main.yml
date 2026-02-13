@@ -1,4 +1,4 @@
-name: Build FuelSavvy Pro (Final)
+name: Build FuelSavvy Pro (Final Fix)
 
 on:
   push:
@@ -13,32 +13,42 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v3
 
-      # Java 17 is REQUIRED for modern Android builds (Fixes Exit Code 1)
-      - name: Setup Java 17
+      # Use Java 11 (The most stable version for Cordova builds)
+      - name: Setup Java 11
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '16'
+
+      # Fix for "Exit Code 1" - Setup SDK & Accept Licenses
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 8512546
 
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Setup Project
+      - name: Create Project & Build
         run: |
+          # Create Project
           cordova create fuelapp com.fuelsavvy.pro "Fuel Savvy Pro"
           cd fuelapp
           
-          # Use Android 12.0.0 (Matches Java 17 perfectly)
-          cordova platform add android@12.0.0
+          # Use Android 11.0.0 (Prevents the XmlParser/Gradle error)
+          cordova platform add android@11.0.0
           
-          # Copy source files
+          # Copy your Index file
           rm -rf www/*
           cp ../index.html www/index.html
+          
+          # Copy your Custom Manifest (For Deep Links)
+          cp ../AndroidManifest.xml platforms/android/app/src/main/AndroidManifest.xml
           
           # Add Plugins
           cordova plugin add cordova-plugin-geolocation
@@ -46,12 +56,12 @@ jobs:
       - name: Build Debug APK
         run: |
           cd fuelapp
-          # Optimize Gradle to prevent memory crashes
+          # Set memory limits to prevent crashes
           export GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2048m"
           cordova build android --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: FuelSavvy-Install-Now
+          name: FuelSavvy-Final-Fix
           path: fuelapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
